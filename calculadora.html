@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR" x-data="{ darkMode: false }" :class="{ 'dark': darkMode }">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PercentSplit</title>
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind + Plugins -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#3b82f6',
+              600: '#2563eb',
+            },
+            creative: {
+              500: '#ec4899',
+              600: '#db2777',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  
+  <!-- Alpine JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .dark .glass-card {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .participant-item {
+      transition: all 0.3s ease;
+    }
+    .participant-item:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 min-h-screen font-sans transition-colors duration-300">
+  <!-- Background Particles -->
+  <div id="particles-js" class="fixed inset-0 z-0 opacity-20 dark:opacity-10"></div>
+  
+  <div class="container mx-auto px-4 py-8 max-w-2xl relative z-10">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-500 to-creative-500 bg-clip-text text-transparent">
+        PercentSplit
+      </h1>
+      <button @click="darkMode = !darkMode" class="p-2 rounded-full bg-white dark:bg-gray-700 shadow-md">
+        <svg x-show="!darkMode" class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+        <svg x-show="darkMode" class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+      </button>
+    </header>
+    
+    <!-- Main Card -->
+    <div class="glass-card rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
+      <div class="p-6">
+        <!-- Percentual Base -->
+        <div class="mb-6">
+          <label for="percentualBase" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Percentual total (será considerado como 100% para divisão)
+          </label>
+          <div class="relative">
+            <input 
+              type="number" 
+              id="percentualBase" 
+              step="0.01" 
+              placeholder="Ex: 41.7" 
+              class="w-full py-3 px-4 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+            />
+            <span class="absolute right-4 top-3 text-gray-500 dark:text-gray-400 font-medium">%</span>
+          </div>
+        </div>
+        
+        <!-- Lista de Pessoas -->
+        <div class="mb-6">
+          <div id="pessoasContainer" class="space-y-4"></div>
+        </div>
+        
+        <!-- Botões -->
+        <div class="flex gap-3">
+          <button 
+            onclick="adicionarPessoa()" 
+            class="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-3 px-6 rounded-lg font-medium shadow transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Adicionar Pessoa
+          </button>
+          
+          <button 
+            onclick="calcularDivisao()" 
+            class="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white py-3 px-6 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m2 2v6m2-8a2 2 0 11-4 0 2 2 0 014 0zM3 17a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2z"></path>
+            </svg>
+            Calcular Divisão
+          </button>
+        </div>
+      </div>
+      
+      <!-- Resultados -->
+      <div id="resultado" class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 hidden">
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Resultado da Divisão
+        </h3>
+        
+        <div id="resultadosContainer" class="space-y-3"></div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p>Gabriel Cesar - Todos os direitos reservados</p>
+    </footer>
+  </div>
+
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  
+  <script>
+    // Inicializa Particles.js
+    document.addEventListener('DOMContentLoaded', function() {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 30, density: { enable: true, value_area: 800 } },
+          color: { value: "#3b82f6" },
+          shape: { type: "circle" },
+          opacity: { value: 0.5, random: true },
+          size: { value: 3, random: true },
+          line_linked: { enable: true, distance: 150, color: "#3b82f6", opacity: 0.4, width: 1 },
+          move: { enable: true, speed: 2, direction: "none", random: true, straight: false, out_mode: "out" }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "grab" },
+            onclick: { enable: true, mode: "push" }
+          }
+        }
+      });
+    });
+
+    function adicionarPessoa() {
+      const pessoasContainer = document.getElementById("pessoasContainer");
+      const div = document.createElement("div");
+      div.className = "participant-item bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-4";
+      div.innerHTML = `
+        <div class="flex-1">
+          <input 
+            type="text" 
+            placeholder="Nome da pessoa" 
+            class="w-full px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary-500 focus:outline-none transition-colors duration-200"
+          />
+        </div>
+        <div class="relative w-24">
+          <input 
+            type="number" 
+            step="0.01" 
+            placeholder="%" 
+            class="w-full px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-transparent text-right focus:border-primary-500 focus:outline-none transition-colors duration-200"
+          />
+          <span class="absolute right-0 top-2 text-gray-500">%</span>
+        </div>
+        <button onclick="this.parentNode.remove()" class="text-gray-400 hover:text-red-500 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      `;
+      pessoasContainer.appendChild(div);
+    }
+
+    function calcularDivisao() {
+      const base = parseFloat(document.getElementById("percentualBase").value.replace(",", "."));
+      if (isNaN(base) || base <= 0) {
+        alert("Informe um percentual base válido.");
+        return;
+      }
+
+      const pessoas = document.querySelectorAll("#pessoasContainer .participant-item");
+      let totalPercentual = 0;
+      let dados = [];
+
+      pessoas.forEach((p) => {
+        const nome = p.querySelector("input[type='text']").value.trim();
+        const percentual = parseFloat(p.querySelector("input[type='number']").value.replace(",", "."));
+        if (!nome || isNaN(percentual) || percentual <= 0) return;
+
+        dados.push({ nome, percentual });
+        totalPercentual += percentual;
+      });
+
+      if (dados.length === 0 || totalPercentual === 0) {
+        alert("Adicione pelo menos uma pessoa com percentual válido.");
+        return;
+      }
+
+      const resultadoDiv = document.getElementById("resultado");
+      const resultadosContainer = document.getElementById("resultadosContainer");
+      
+      resultadosContainer.innerHTML = "";
+      
+      dados.forEach((pessoa) => {
+        const valor = (pessoa.percentual / totalPercentual) * base;
+        const div = document.createElement("div");
+        div.className = "bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm";
+        div.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-medium">${pessoa.nome}</span>
+            <span class="font-bold">${valor.toFixed(4)}%</span>
+          </div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            Participação: ${pessoa.percentual.toFixed(2)}%
+          </div>
+        `;
+        resultadosContainer.appendChild(div);
+      });
+
+      resultadoDiv.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
